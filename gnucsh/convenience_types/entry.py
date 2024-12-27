@@ -1,4 +1,5 @@
-# pyright: reportUnknownVariableType=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportMissingTypeStubs=false
+# pyright: reportUnknownVariableType=false, reportUnknownMemberType=false
+# pyright: reportUnknownArgumentType=false, reportMissingTypeStubs=false
 
 import datetime
 from typing import cast
@@ -51,7 +52,8 @@ class Entry:
     """ Account to, or from which, the is being sent. """
 
     type: int
-    """ If it's a DEPOSITE or a WITHDRAWAL. Also represented in the value being positive or negative. """
+    """ If it's a DEPOSITE or a WITHDRAWAL. Also represented in the value being
+    positive or negative. """
 
     thisAccount: EntryAccount
     """
@@ -75,11 +77,13 @@ class Entry:
         self.description = transaction.description
         self.date = transaction.post_date
 
-        # I don't think I will need it, but I don't want to have errors go unnoticed
+        # I don't think I will need it, but I don't want to have errors go
+        # unnoticed
         entrySplits = cast(CallableList, transaction.splits)
         if len(entrySplits) != 2:
             raise ValueError(
-                "Expected only 2 accounts. Please implement missing logic. Problematic entry:\n {}  {}".format(
+                "Expected only 2 accounts. Please implement missing logic. "
+                + "Problematic entry:\n {}  {}".format(
                     self.date, self.description
                 )
             )

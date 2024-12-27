@@ -1,4 +1,5 @@
-# pyright: reportUnknownVariableType=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportMissingTypeStubs=false
+# pyright: reportUnknownVariableType=false, reportUnknownMemberType=false
+# pyright: reportMissingTypeStubs=false, reportUnknownArgumentType=false
 
 import re
 from typing import Optional, cast
@@ -60,10 +61,10 @@ class BaseAccount:
     ) -> list[Entry]:
         foundEntries: list[Entry] = []
         for e in self.getEntries():
-            if matcher == None:
+            if matcher is None:
                 foundEntries.append(e)
             else:
-                if re.search(matcher, e.description) != None:
+                if re.search(matcher, e.description) is not None:
                     foundEntries.append(e)
         return foundEntries
 
@@ -75,7 +76,8 @@ class BaseAccount:
     def getEntries(self) -> list[Entry]:
         entries: list[Entry] = []
         for sp in cast(list[Split], self.backingAccount.splits):
-            # "split" means an entry in the log. Convert it to a more convenient helper class.
+            # "split" means an entry in the log. Convert it to a more
+            # convenient helper class.
             entries.append(Entry(sp))
         return entries
 

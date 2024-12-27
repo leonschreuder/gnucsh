@@ -1,4 +1,5 @@
-# pyright: reportUnknownVariableType=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportMissingTypeStubs=false
+# pyright: reportUnknownVariableType=false, reportUnknownMemberType=false
+# pyright: reportUnknownArgumentType=false, reportMissingTypeStubs=false
 
 import argparse
 import re
@@ -21,7 +22,8 @@ def main():
     _ = parser.add_argument(
         "-t",
         "--transfer",
-        help="Change the transfer account on the selected transactions to the one provided.",
+        help="Change the transfer account on the selected transactions to "
+        + "the one provided.",
     )
     _ = parser.add_argument(
         "-f",
@@ -31,7 +33,8 @@ def main():
     _ = parser.add_argument(
         "-d",
         "--duplicates",
-        help="Provide an account and search for duplicates (same date + description)",
+        help="Provide an account and search for duplicates "
+        + "(same date + description)",
     )
     args: argparse.Namespace = parser.parse_args()
     bookPath = cast(str, args.bookPath)
@@ -45,12 +48,12 @@ def main():
             "Provided path to GnuCash db was not found: " + bookPath
         )
 
-    if inputAccount != None:
-        if newTransferAccountName != None:
+    if inputAccount is not None:
+        if newTransferAccountName is not None:
             changeTransferAccount(
                 bookPath, inputAccount, newTransferAccountName, filter
             )
-        elif duplicatesAccount != None:
+        elif duplicatesAccount is not None:
             unifyDuplicates(bookPath, inputAccount, duplicatesAccount)
         else:
             listTransactions(bookPath, inputAccount, filter)
@@ -77,7 +80,8 @@ def changeTransferAccount(
             print(e)
 
         user_input = input(
-            "Are you sure you want to change the Transfer account of the above entries to {}? [Y/n]".format(
+            "Are you sure you want to change the Transfer account "
+            + "of the above entries to {}? [Y/n]".format(
                 newTransferAccount.fullname
             )
         )
@@ -108,7 +112,8 @@ def unifyDuplicates(
             print("- other:" + str(otherEntry))
 
         user_input = input(
-            "Are you sure you want to link the main entries to the '{}' and remove the 'other' entries? [Y/n]".format(
+            "Are you sure you want to link the main entries to the"
+            + " '{}' and remove the 'other' entries? [Y/n]".format(
                 otherAccount.fullname
             )
         )
@@ -123,14 +128,14 @@ def unifyDuplicates(
 
 
 def listAccounts(bookPath: str, filter: Optional[str] = None):
-    if filter == None:
+    if filter is None:
         print("### All Accounts ###")
     else:
         print("### Listing Accounts matching '" + filter + "' ###")
 
     with openLedger(bookPath) as ledger:
         for acc in ledger.getAllAccounts():
-            if filter == None:
+            if filter is None:
                 print(acc.fullname)
             else:
                 if re.search(filter, acc.fullname):
