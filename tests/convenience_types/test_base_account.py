@@ -39,10 +39,10 @@ class TestBaseAccount(unittest.TestCase):
             self.assertEqual(2, len(entries))
             self.assertEqual("Groceries", entries[0].description)
             self.assertEqual("Savings", entries[0].account_path)
-            self.assertEqual('4', entries[0].value)
+            self.assertEqual("4", entries[0].value)
             self.assertEqual("Pharmacy", entries[1].description)
             self.assertEqual("Savings", entries[1].account_path)
-            self.assertEqual('15', entries[1].value)
+            self.assertEqual("15", entries[1].value)
 
     def test__remove_entry(self):
         testBookFile = os.path.join(tempfile.gettempdir(), "example.gnucash")
@@ -54,11 +54,13 @@ class TestBaseAccount(unittest.TestCase):
 
             expensesAcct.removeEntry(entries[0])
 
-            book.save() # might cause problems if removing is incorrect
+            book.save()  # might cause problems if removing is incorrect
 
         with openLedger(testBookFile) as book:
             expensesAcct = book.findAccountByName("Expenses")
-            self.assertEqual(0, len(expensesAcct.findEntriesWithDescription("Gro.*ies")))
+            self.assertEqual(
+                0, len(expensesAcct.findEntriesWithDescription("Gro.*ies"))
+            )
 
     def test__find_duplicates(self):
         # given
@@ -75,7 +77,11 @@ class TestBaseAccount(unittest.TestCase):
             self.assertEqual(1, len(foundPairs))
             first = foundPairs[0][0]
             second = foundPairs[0][1]
-            self.assertEqual(second.description, first.description, "should have same description")
+            self.assertEqual(
+                second.description,
+                first.description,
+                "should have same description",
+            )
             # first is expenses to imbalance
             self.assertEqual("Expenses", first.thisAccount.account_path)
             self.assertEqual("Imbalance-EUR", first.otherAccount.account_path)

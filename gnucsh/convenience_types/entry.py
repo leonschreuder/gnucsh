@@ -2,9 +2,10 @@
 
 import datetime
 from typing import cast
-from typing_extensions import override
+
 from piecash.core.account import Account
 from piecash.core.transaction import CallableList, Split, Transaction
+from typing_extensions import override
 
 
 class EntryAccount:
@@ -15,10 +16,10 @@ class EntryAccount:
     backingAccount: Account
     _split: Split
 
-    def __init__(self, split : Split):
+    def __init__(self, split: Split):
         self._split = split
         self.backingAccount = cast(Account, split.account)
-        
+
         self.value = str(split.value)
         self.description = self.backingAccount.description
         self.account_path = self.backingAccount.fullname
@@ -36,14 +37,14 @@ class TransactionType:
 
 
 class Entry:
-    """ A class representing a simplified entry in the Ledger. """
-    
+    """A class representing a simplified entry in the Ledger."""
+
     date: datetime.date
 
     value: str
     """ How much money $$$ """
 
-    description :str
+    description: str
     """ The text provided with the transaction. """
 
     account_path: str
@@ -64,9 +65,9 @@ class Entry:
     otherAccount is where the money is coming from.
     """
 
-    backingSplit : Split
+    backingSplit: Split
 
-    def __init__(self, split : Split):
+    def __init__(self, split: Split):
         self.backingSplit = split
         transaction = cast(Transaction, split.transaction)
         account = cast(Account, split.account)
@@ -77,7 +78,11 @@ class Entry:
         # I don't think I will need it, but I don't want to have errors go unnoticed
         entrySplits = cast(CallableList, transaction.splits)
         if len(entrySplits) != 2:
-            raise ValueError("Expected only 2 accounts. Please implement missing logic. Problematic entry:\n {}  {}".format(self.date, self.description))
+            raise ValueError(
+                "Expected only 2 accounts. Please implement missing logic. Problematic entry:\n {}  {}".format(
+                    self.date, self.description
+                )
+            )
 
         # usually there are two 'splits' so entryAccounts per
         # transaction/entry. The first denotes where to it was sent and the
@@ -109,15 +114,25 @@ class Entry:
         # use the second account's path to describe where it whent
         self.account_path = self.otherAccount.account_path
 
-
     @override
     def __str__(self) -> str:
-        dateWidth=11
-        amountWidth=8
-        descriptionWidth=135
+        dateWidth = 11
+        amountWidth = 8
+        descriptionWidth = 135
         formattedDate = self.date.strftime("%Y-%m-%d")
-        positiveValueIndented = (" " + self.value) if not self.value.startswith("-") else self.value
-        descriptionWithElipsis = (self.description[:(descriptionWidth-4)] + '...') if len(self.description) > descriptionWidth  else self.description
-        return "{} {} {} {}".format(formattedDate.ljust(dateWidth), positiveValueIndented.ljust(amountWidth), descriptionWithElipsis.ljust(descriptionWidth), self.otherAccount.account_path)
-
-
+        positiveValueIndented = (
+            (" " + self.value)
+            if not self.value.startswith("-")
+            else self.value
+        )
+        descriptionWithElipsis = (
+            (self.description[: (descriptionWidth - 4)] + "...")
+            if len(self.description) > descriptionWidth
+            else self.description
+        )
+        return "{} {} {} {}".format(
+            formattedDate.ljust(dateWidth),
+            positiveValueIndented.ljust(amountWidth),
+            descriptionWithElipsis.ljust(descriptionWidth),
+            self.otherAccount.account_path,
+        )

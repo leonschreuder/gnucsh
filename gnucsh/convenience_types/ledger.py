@@ -1,6 +1,7 @@
 # pyright: reportUnknownVariableType=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportMissingTypeStubs=false
 
 from typing import cast
+
 from piecash import Account, Book, create_book, open_book
 
 from gnucsh.convenience_types.base_account import BaseAccount
@@ -25,12 +26,11 @@ class Ledger:
             return BaseAccount(self.backingBook.accounts(name=targetName))
 
     def getAllAccounts(self):
-        allAccounts : list[Account] = self.backingBook.accounts
-        finalAccounts : list[BaseAccount] = []
+        allAccounts: list[Account] = self.backingBook.accounts
+        finalAccounts: list[BaseAccount] = []
         for acc in allAccounts:
             finalAccounts.append(BaseAccount(acc))
         return finalAccounts
-
 
     def getRootAccount(self):
         return BaseAccount(cast(Account, self.backingBook.root_account))
@@ -48,8 +48,12 @@ class Ledger:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.backingBook.__exit__(exc_type, exc_val, exc_tb)
 
+
 def openLedger(file: str) -> Ledger:
-    return Ledger(cast(Book, open_book(file, readonly=False, open_if_lock=True)))
+    return Ledger(
+        cast(Book, open_book(file, readonly=False, open_if_lock=True))
+    )
+
 
 def createLedger(file: str) -> Ledger:
     return Ledger(create_book(file, overwrite=True))

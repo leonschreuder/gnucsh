@@ -2,6 +2,7 @@ import os
 
 from gnucsh.convenience_types.ledger import createLedger, openLedger
 
+
 def createTestLedger(file: str):
     if os.path.isfile(file):
         os.remove(file)
@@ -19,14 +20,16 @@ def createTestLedger(file: str):
 
         book.save()
 
+
 def createTestLedgerWithDuplicates(testBookFile: str):
     createTestLedger(testBookFile)
     with openLedger(testBookFile) as ledger:
         expensesAcc = ledger.findAccountByName("Expenses")
         savingsAcc = ledger.findAccountByName("Savings")
-        imbalanceAcct = ledger.getRootAccount().createBankAccount("Imbalance-EUR")
+        imbalanceAcct = ledger.getRootAccount().createBankAccount(
+            "Imbalance-EUR"
+        )
 
         expensesAcc.addEntry("10", "some description", imbalanceAcct)
         savingsAcc.addEntry("-10", "some description", imbalanceAcct)
         ledger.save()
-
