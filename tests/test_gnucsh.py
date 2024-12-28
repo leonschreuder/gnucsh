@@ -9,7 +9,7 @@ import builtins
 
 from datetime import datetime
 from gnucsh.convenience_types.ledger import openLedger
-from gnucsh.gnucsh import (
+from gnucsh.cli import (
     changeTransferAccount,
     unifyDuplicates,
     listAccounts,
