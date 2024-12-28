@@ -1,62 +1,38 @@
-
-# Python Project Template
-
-A low dependency and really simple to start project template for Python Projects.
-
-See also 
-- [Flask-Project-Template](https://github.com/rochacbruno/flask-project-template/) for a full feature Flask project including database, API, admin interface, etc.
-- [FastAPI-Project-Template](https://github.com/rochacbruno/fastapi-project-template/) The base to start an openapi project featuring: SQLModel, Typer, FastAPI, JWT Token Auth, Interactive Shell, Management Commands.
-
-### HOW TO USE THIS TEMPLATE
-
-> **DO NOT FORK** this is meant to be used from **[Use this template](https://github.com/rochacbruno/python-project-template/generate)** feature.
-
-1. Click on **[Use this template](https://github.com/rochacbruno/python-project-template/generate)**
-3. Give a name to your project  
-   (e.g. `my_awesome_project` recommendation is to use all lowercase and underscores separation for repo names.)
-3. Wait until the first run of CI finishes  
-   (Github Actions will process the template and commit to your new repo)
-4. If you want [codecov](https://about.codecov.io/sign-up/) Reports and Automatic Release to [PyPI](https://pypi.org)  
-  On the new repository `settings->secrets` add your `PYPI_API_TOKEN` and `CODECOV_TOKEN` (get the tokens on respective websites)
-4. Read the file [CONTRIBUTING.md](CONTRIBUTING.md)
-5. Then clone your new project and happy coding!
-
-> **NOTE**: **WAIT** until first CI run on github actions before cloning your new project.
-
-### What is included on this template?
-
-- 🖼️ Templates for starting multiple application types:
-  * **Basic low dependency** Python program (default) [use this template](https://github.com/rochacbruno/python-project-template/generate)
-  * **Flask** with database, admin interface, restapi and authentication [use this template](https://github.com/rochacbruno/flask-project-template/generate).
-  **or Run `make init` after cloning to generate a new project based on a template.**
-- 📦 A basic [setup.py](setup.py) file to provide installation, packaging and distribution for your project.  
-  Template uses setuptools because it's the de-facto standard for Python packages, you can run `make switch-to-poetry` later if you want.
-- 🤖 A [Makefile](Makefile) with the most useful commands to install, test, lint, format and release your project.
-- 📃 Documentation structure using [mkdocs](http://www.mkdocs.org)
-- 💬 Auto generation of change log using **gitchangelog** to keep a HISTORY.md file automatically based on your commit history on every release.
-- 🐋 A simple [Containerfile](Containerfile) to build a container image for your project.  
-  `Containerfile` is a more open standard for building container images than Dockerfile, you can use buildah or docker with this file.
-- 🧪 Testing structure using [pytest](https://docs.pytest.org/en/latest/)
-- ✅ Code linting using [flake8](https://flake8.pycqa.org/en/latest/)
-- 📊 Code coverage reports using [codecov](https://about.codecov.io/sign-up/)
-- 🛳️ Automatic release to [PyPI](https://pypi.org) using [twine](https://twine.readthedocs.io/en/latest/) and github actions.
-- 🎯 Entry points to execute your program using `python -m <gnucsh>` or `$ gnucsh` with basic CLI argument parsing.
-- 🔄 Continuous integration using [Github Actions](.github/workflows/) with jobs to lint, test and release your project on Linux, Mac and Windows environments.
-
-> Curious about architectural decisions on this template? read [ABOUT_THIS_TEMPLATE.md](ABOUT_THIS_TEMPLATE.md)  
-> If you want to contribute to this template please open an [issue](https://github.com/rochacbruno/python-project-template/issues) or fork and send a PULL REQUEST.
-
-[❤️ Sponsor this project](https://github.com/sponsors/rochacbruno/)
-
-<!--  DELETE THE LINES ABOVE THIS AND WRITE YOUR PROJECT README BELOW -->
-
----
 # gnucsh
 
 [![codecov](https://codecov.io/gh/leonschreuder/gnucsh/branch/main/graph/badge.svg?token=gnucsh_token_here)](https://codecov.io/gh/leonschreuder/gnucsh)
 [![CI](https://github.com/leonschreuder/gnucsh/actions/workflows/main.yml/badge.svg)](https://github.com/leonschreuder/gnucsh/actions/workflows/main.yml)
 
-Awesome gnucsh created by leonschreuder
+This is a convenience CLI for a few batch operations in gnucash I needed at
+some point.
+
+```bash
+# list all accounts:
+gnucsh mybook.gnucsh
+
+# list transactions for the specified account
+gnucsh mybook.gnucsh My:Account
+
+# list transactions for the specified account that match the (regex) filter
+gnucsh mybook.gnucsh My:Account -f "Some Store"
+
+# Change the listed transactions' transfer account, to the provided account
+gnucsh mybook.gnucsh My:Account -f "Some Store" -t "My:Other
+
+# WARNING: There is a better way to do this. See below
+# Tries to find duplicate entries shared between the two accounts, links them and removes the duplicate
+gnucsh mybook.gnucsh My:Account -d My:Other
+```
+
+The command to unify duplicates was meant to solve the situation where you have
+a checking and a savings account for example, and they are both synced from
+your bank with online transactions. Gnucash does not understand that you moved
+money from one to the other, and sees two unlinked transactions. If you link
+them to the correct account, then the entries are listed twice in each account.
+A better way to deal with this however, is to create a third "transfer" account
+and link both transactions to it. This transfer account will add up to zero
+(thereby verifying everything is linked correctly) and you don't have to delete
+any transactions.
 
 ## Install it from PyPI
 
