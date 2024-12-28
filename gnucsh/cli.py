@@ -3,7 +3,6 @@
 
 import argparse
 import re
-import warnings
 from os.path import exists
 from typing import Optional, cast
 
@@ -143,7 +142,7 @@ def listAccounts(bookPath: str, filter: Optional[str] = None):
 
 
 def listTransactions(
-    bookPath: str, accountName: str, filter: Optional[str] = None
+    bookPath: str, accountName: str, filter: str | None
 ):
     with openLedger(bookPath) as ledger:
         accountToList = ledger.findAccountByName(accountName)
@@ -158,7 +157,5 @@ def listTransactions(
             print(entry)
 
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    if __name__ == "__main__":
-        main()
+if __name__ == "__main__":
+    main()
