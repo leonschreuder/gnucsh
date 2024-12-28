@@ -2,7 +2,7 @@
 # pyright: reportMissingTypeStubs=false, reportUnknownArgumentType=false
 
 import re
-from typing import Optional, cast
+from typing import cast
 
 from piecash import Account, Split
 from piecash.core.transaction import Decimal, Transaction
@@ -56,9 +56,7 @@ class BaseAccount:
             ],
         )
 
-    def findEntriesWithDescription(
-        self, matcher: Optional[str]
-    ) -> list[Entry]:
+    def findEntriesWithDescription(self, matcher: str | None) -> list[Entry]:
         foundEntries: list[Entry] = []
         for e in self.getEntries():
             if matcher is None:

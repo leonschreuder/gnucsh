@@ -4,7 +4,7 @@
 import argparse
 import re
 from os.path import exists
-from typing import Optional, cast
+from typing import cast
 
 from gnucsh.convenience_types.ledger import openLedger
 
@@ -37,10 +37,10 @@ def main():
     )
     args: argparse.Namespace = parser.parse_args()
     bookPath = cast(str, args.bookPath)
-    inputAccount = cast(Optional[str], args.account)
-    newTransferAccountName = cast(Optional[str], args.transfer)
-    filter = cast(Optional[str], args.filter)
-    duplicatesAccount = cast(Optional[str], args.duplicates)
+    inputAccount = cast(str | None, args.account)
+    newTransferAccountName = cast(str | None, args.transfer)
+    filter = cast(str | None, args.filter)
+    duplicatesAccount = cast(str | None, args.duplicates)
 
     if not exists(bookPath):
         raise ValueError(
@@ -64,7 +64,7 @@ def changeTransferAccount(
     bookPath: str,
     inputAccount: str,
     newTransferAccountName: str,
-    filter: Optional[str] = None,
+    filter: str | None,
 ):
     with openLedger(bookPath) as ledger:
         accountContainingTransactions = ledger.findAccountByName(inputAccount)
@@ -126,7 +126,7 @@ def unifyDuplicates(
             ledger.save()
 
 
-def listAccounts(bookPath: str, filter: Optional[str] = None):
+def listAccounts(bookPath: str, filter: str | None = None):
     if filter is None:
         print("### All Accounts ###")
     else:
@@ -142,7 +142,7 @@ def listAccounts(bookPath: str, filter: Optional[str] = None):
 
 
 def listTransactions(
-    bookPath: str, accountName: str, filter: str | None
+    bookPath: str, accountName: str, filter: str | None = None
 ):
     with openLedger(bookPath) as ledger:
         accountToList = ledger.findAccountByName(accountName)

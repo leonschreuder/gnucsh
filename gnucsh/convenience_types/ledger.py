@@ -52,12 +52,12 @@ class Ledger:
 
 def openLedger(file: str) -> Ledger:
     import warnings
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         return Ledger(
             cast(Book, open_book(file, readonly=False, open_if_lock=True))
         )
-
 
 
 def createLedger(file: str) -> Ledger:
