@@ -2,7 +2,8 @@
 # pyright: reportMissingTypeStubs=false, reportUnknownArgumentType=false
 
 import re
-from typing import Optional, cast
+import warnings
+from typing import cast
 
 from piecash import Account, Split
 from piecash.core.transaction import Decimal, Transaction
@@ -36,29 +37,31 @@ class BaseAccount:
         return self.createAccount(name, "EXPENSE")
 
     def createAccount(self, name: str, type: str):
-        return BaseAccount(
-            Account(
-                parent=self.backingAccount,
-                name=name,
-                type=type,
-                commodity=self.backingAccount.commodity,
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            return BaseAccount(
+                Account(
+                    parent=self.backingAccount,
+                    name=name,
+                    type=type,
+                    commodity=self.backingAccount.commodity,
+                )
             )
-        )
 
     def addEntry(self, value: str, description: str, base: Self):
-        valueNum = Decimal(value)
-        _ = Transaction(
-            currency=self.backingAccount.commodity,
-            description=description,
-            splits=[
-                Split(value=valueNum, account=self.backingAccount),
-                Split(value=-valueNum, account=base.backingAccount),
-            ],
-        )
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            valueNum = Decimal(value)
+            _ = Transaction(
+                currency=self.backingAccount.commodity,
+                description=description,
+                splits=[
+                    Split(value=valueNum, account=self.backingAccount),
+                    Split(value=-valueNum, account=base.backingAccount),
+                ],
+            )
 
-    def findEntriesWithDescription(
-        self, matcher: Optional[str]
-    ) -> list[Entry]:
+    def findEntriesWithDescription(self, matcher: str | None) -> list[Entry]:
         foundEntries: list[Entry] = []
         for e in self.getEntries():
             if matcher is None:
@@ -74,12 +77,14 @@ class BaseAccount:
         )
 
     def getEntries(self) -> list[Entry]:
-        entries: list[Entry] = []
-        for sp in cast(list[Split], self.backingAccount.splits):
-            # "split" means an entry in the log. Convert it to a more
-            # convenient helper class.
-            entries.append(Entry(sp))
-        return entries
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            entries: list[Entry] = []
+            for sp in cast(list[Split], self.backingAccount.splits):
+                # "split" means an entry in the log. Convert it to a more
+                # convenient helper class.
+                entries.append(Entry(sp))
+            return entries
 
     def findDuplicates(self, otherAccount: Self):
         foundPairs: list[tuple[Entry, Entry]] = []

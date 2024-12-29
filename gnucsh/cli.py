@@ -1,71 +1,57 @@
-# pyright: reportUnknownVariableType=false, reportUnknownMemberType=false
-# pyright: reportUnknownArgumentType=false, reportMissingTypeStubs=false
-
-import argparse
 import re
-import warnings
-from os.path import exists
-from typing import Optional, cast
+
+import click
 
 from gnucsh.convenience_types.ledger import openLedger
 
 
-def main():
+@click.command()
+@click.argument("book_path", type=str)
+@click.argument("account", required=False, type=str)
+@click.option(
+    "-t",
+    "--transfer",
+    type=str,
+    help="Change the transfer account on the selected"
+    + " transactions to the one provided.",
+)
+@click.option(
+    "-f",
+    "--filter",
+    type=str,
+    help="Regex filter. Valid both for listing accounts and transactions.",
+)
+@click.option(
+    "-d",
+    "--duplicates",
+    type=str,
+    help="Provide an account and search for"
+    + " duplicates (same date + description).",
+)
+def main(
+    book_path: str,
+    account: str | None,
+    transfer: str | None,
+    filter: str | None,
+    duplicates: str | None,
+):
 
-    parser = argparse.ArgumentParser()
-    _ = parser.add_argument("bookPath", help="Path to the GnuCach db")
-    _ = parser.add_argument(
-        "account",
-        nargs="?",
-        help="Account to list (optional). Lists all account names otherwise.",
-    )
-    _ = parser.add_argument(
-        "-t",
-        "--transfer",
-        help="Change the transfer account on the selected transactions to "
-        + "the one provided.",
-    )
-    _ = parser.add_argument(
-        "-f",
-        "--filter",
-        help="Regex filter. Valid both for listing accounts and transactions.",
-    )
-    _ = parser.add_argument(
-        "-d",
-        "--duplicates",
-        help="Provide an account and search for duplicates "
-        + "(same date + description)",
-    )
-    args: argparse.Namespace = parser.parse_args()
-    bookPath = cast(str, args.bookPath)
-    inputAccount = cast(Optional[str], args.account)
-    newTransferAccountName = cast(Optional[str], args.transfer)
-    filter = cast(Optional[str], args.filter)
-    duplicatesAccount = cast(Optional[str], args.duplicates)
-
-    if not exists(bookPath):
-        raise ValueError(
-            "Provided path to GnuCash db was not found: " + bookPath
-        )
-
-    if inputAccount is not None:
-        if newTransferAccountName is not None:
-            changeTransferAccount(
-                bookPath, inputAccount, newTransferAccountName, filter
-            )
-        elif duplicatesAccount is not None:
-            unifyDuplicates(bookPath, inputAccount, duplicatesAccount)
+    if account is not None:
+        if transfer is not None:
+            changeTransferAccount(book_path, account, transfer, filter)
+        elif duplicates is not None:
+            unifyDuplicates(book_path, account, duplicates)
         else:
-            listTransactions(bookPath, inputAccount, filter)
+            listTransactions(book_path, account, filter)
     else:
-        listAccounts(bookPath, filter)
+        listAccounts(book_path, filter)
 
 
 def changeTransferAccount(
     bookPath: str,
     inputAccount: str,
     newTransferAccountName: str,
-    filter: Optional[str] = None,
+    filter: str | None,
 ):
     with openLedger(bookPath) as ledger:
         accountContainingTransactions = ledger.findAccountByName(inputAccount)
@@ -127,7 +113,7 @@ def unifyDuplicates(
             ledger.save()
 
 
-def listAccounts(bookPath: str, filter: Optional[str] = None):
+def listAccounts(bookPath: str, filter: str | None = None):
     if filter is None:
         print("### All Accounts ###")
     else:
@@ -143,7 +129,7 @@ def listAccounts(bookPath: str, filter: Optional[str] = None):
 
 
 def listTransactions(
-    bookPath: str, accountName: str, filter: Optional[str] = None
+    bookPath: str, accountName: str, filter: str | None = None
 ):
     with openLedger(bookPath) as ledger:
         accountToList = ledger.findAccountByName(accountName)
@@ -158,7 +144,5 @@ def listTransactions(
             print(entry)
 
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    if __name__ == "__main__":
-        main()
+if __name__ == "__main__":
+    main()
