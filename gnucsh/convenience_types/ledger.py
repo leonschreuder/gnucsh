@@ -1,6 +1,7 @@
 # pyright: reportUnknownVariableType=false, reportUnknownMemberType=false
 # pyright: reportUnknownArgumentType=false, reportMissingTypeStubs=false
 
+import warnings
 from typing import cast
 
 from piecash import Account, Book, create_book, open_book
@@ -21,19 +22,25 @@ class Ledger:
         self.backingBook = book
 
     def findAccountByName(self, targetName: str) -> BaseAccount:
-        if ":" in targetName:
-            return BaseAccount(self.backingBook.accounts(fullname=targetName))
-        else:
-            return BaseAccount(self.backingBook.accounts(name=targetName))
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            if ":" in targetName:
+                return BaseAccount(
+                    self.backingBook.accounts(fullname=targetName)
+                )
+            else:
+                return BaseAccount(self.backingBook.accounts(name=targetName))
 
-    def getAllAccounts(self):
-        allAccounts: list[Account] = self.backingBook.accounts
-        finalAccounts: list[BaseAccount] = []
-        for acc in allAccounts:
-            finalAccounts.append(BaseAccount(acc))
-        return finalAccounts
+    def getAllAccounts(self) -> list[BaseAccount]:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            allAccounts: list[Account] = self.backingBook.accounts
+            finalAccounts: list[BaseAccount] = []
+            for acc in allAccounts:
+                finalAccounts.append(BaseAccount(acc))
+            return finalAccounts
 
-    def getRootAccount(self):
+    def getRootAccount(self) -> BaseAccount:
         return BaseAccount(cast(Account, self.backingBook.root_account))
 
     def save(self):
@@ -51,8 +58,6 @@ class Ledger:
 
 
 def openLedger(file: str) -> Ledger:
-    import warnings
-
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         return Ledger(
@@ -61,4 +66,6 @@ def openLedger(file: str) -> Ledger:
 
 
 def createLedger(file: str) -> Ledger:
-    return Ledger(create_book(file, overwrite=True))
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return Ledger(create_book(file, overwrite=True))

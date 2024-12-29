@@ -1,6 +1,3 @@
-# pyright: reportUnknownVariableType=false, reportUnknownMemberType=false
-# pyright: reportUnknownArgumentType=false, reportMissingTypeStubs=false
-
 import argparse
 import re
 from os.path import exists

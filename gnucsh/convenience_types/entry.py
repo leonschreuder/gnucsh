@@ -2,6 +2,7 @@
 # pyright: reportUnknownArgumentType=false, reportMissingTypeStubs=false
 
 import datetime
+import warnings
 from typing import cast
 
 from piecash.core.account import Account
@@ -70,53 +71,55 @@ class Entry:
     backingSplit: Split
 
     def __init__(self, split: Split):
-        self.backingSplit = split
-        transaction = cast(Transaction, split.transaction)
-        account = cast(Account, split.account)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.backingSplit = split
+            transaction = cast(Transaction, split.transaction)
+            account = cast(Account, split.account)
 
-        self.description = transaction.description
-        self.date = transaction.post_date
+            self.description = transaction.description
+            self.date = transaction.post_date
 
-        # I don't think I will need it, but I don't want to have errors go
-        # unnoticed
-        entrySplits = cast(CallableList, transaction.splits)
-        if len(entrySplits) != 2:
-            raise ValueError(
-                "Expected only 2 accounts. Please implement missing logic. "
-                + "Problematic entry:\n {}  {}".format(
-                    self.date, self.description
+            # I don't think I will need it, but I don't want to have errors go
+            # unnoticed
+            entrySplits = cast(CallableList, transaction.splits)
+            if len(entrySplits) != 2:
+                raise ValueError(
+                    "Expected only 2 accounts. Please implement missing"
+                    + " logic. Problematic entry:\n {}  {}".format(
+                        self.date, self.description
+                    )
                 )
-            )
 
-        # usually there are two 'splits' so entryAccounts per
-        # transaction/entry. The first denotes where to it was sent and the
-        # second where from it was withdrawn.
-        accountA = EntryAccount(entrySplits[0])
-        accountB = EntryAccount(entrySplits[1])
+            # usually there are two 'splits' so entryAccounts per
+            # transaction/entry. The first denotes where to it was sent and the
+            # second where from it was withdrawn.
+            accountA = EntryAccount(entrySplits[0])
+            accountB = EntryAccount(entrySplits[1])
 
-        # it is more convenient to represent the transactions as having a
-        # thisAccount, and an otherAccount. That way, we don't have to check
-        # which is which all the time.
+            # it is more convenient to represent the transactions as having a
+            # thisAccount, and an otherAccount. That way, we don't have to
+            # check which is which all the time.
 
-        # if the path is the same as the first entry, this was a deposite.
-        if accountA.account_path == account.fullname:
-            self.thisAccount = accountA
-            self.otherAccount = accountB
-            self.type = TransactionType.DEPOSITE
+            # if the path is the same as the first entry, this was a deposite.
+            if accountA.account_path == account.fullname:
+                self.thisAccount = accountA
+                self.otherAccount = accountB
+                self.type = TransactionType.DEPOSITE
 
-        else:
-            self.thisAccount = accountB
-            self.otherAccount = accountA
+            else:
+                self.thisAccount = accountB
+                self.otherAccount = accountA
 
-            # the path is not the same as the first entry, we assume the second
-            # one is (as one has to be). So it was a withdrawal.
-            self.type = TransactionType.WITHDRAWAL
+                # the path is not the same as the first entry, we assume the
+                # second one is (as one has to be). So it was a withdrawal.
+                self.type = TransactionType.WITHDRAWAL
 
-        # take the positive value in the first entry
-        self.value = self.thisAccount.value
+            # take the positive value in the first entry
+            self.value = self.thisAccount.value
 
-        # use the second account's path to describe where it whent
-        self.account_path = self.otherAccount.account_path
+            # use the second account's path to describe where it whent
+            self.account_path = self.otherAccount.account_path
 
     @override
     def __str__(self) -> str:
