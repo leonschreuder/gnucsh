@@ -22,7 +22,7 @@ class EntryAccount:
         self._split = split
         self.backingAccount = cast(Account, split.account)
 
-        self.value = str(split.value)
+        self.value = "{:.2f}".format(split.value)
         self.description = self.backingAccount.description
         self.account_path = self.backingAccount.fullname
 

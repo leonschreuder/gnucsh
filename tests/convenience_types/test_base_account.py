@@ -1,5 +1,6 @@
 # pyright: reportUnknownVariableType=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportMissingTypeStubs=false
 
+from datetime import datetime
 import unittest
 import os
 import tempfile
@@ -39,10 +40,36 @@ class TestBaseAccount(unittest.TestCase):
             self.assertEqual(2, len(entries))
             self.assertEqual("Groceries", entries[0].description)
             self.assertEqual("Savings", entries[0].account_path)
-            self.assertEqual("4", entries[0].value)
+            self.assertEqual("4.00", entries[0].value)
             self.assertEqual("Pharmacy", entries[1].description)
             self.assertEqual("Savings", entries[1].account_path)
-            self.assertEqual("15", entries[1].value)
+            self.assertEqual("15.00", entries[1].value)
+
+    def test__add_entry(self):
+        testBookFile = os.path.join(tempfile.gettempdir(), "example.gnucash")
+        customDate = datetime.strptime("2024-12-09", "%Y-%m-%d").date()
+        createTestLedger(testBookFile)
+        with openLedger(testBookFile) as book:
+            expensesAcct = book.findAccountByName("Expenses")
+            savingsAcc = book.findAccountByName("Savings")
+            expensesAcct.addEntry("10", "description1", savingsAcc)
+            expensesAcct.addEntry("10", "description2", savingsAcc, customDate)
+            book.save()
+
+        with openLedger(testBookFile) as book:
+            expensesAcct = book.findAccountByName("Expenses")
+            self.assertEqual(
+                1, len(expensesAcct.findEntriesWithDescription("description1"))
+            )
+            assert 1 == len(
+                expensesAcct.findEntriesWithDescription("description2")
+            )
+            assert (
+                customDate
+                == expensesAcct.findEntriesWithDescription("description2")[
+                    0
+                ].date
+            )
 
     def test__remove_entry(self):
         testBookFile = os.path.join(tempfile.gettempdir(), "example.gnucash")
@@ -89,5 +116,5 @@ class TestBaseAccount(unittest.TestCase):
             self.assertEqual("Savings", second.thisAccount.account_path)
             self.assertEqual("Imbalance-EUR", second.otherAccount.account_path)
             # reverse value for each
-            self.assertEqual("10", first.value)
-            self.assertEqual("-10", second.value)
+            self.assertEqual("10.00", first.value)
+            self.assertEqual("-10.00", second.value)

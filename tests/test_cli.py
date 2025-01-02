@@ -11,6 +11,8 @@ from datetime import datetime
 from gnucsh.convenience_types.ledger import openLedger
 from gnucsh.cli import (
     changeTransferAccount,
+    dateStringToDate,
+    importCsv,
     unifyDuplicates,
     listAccounts,
     listTransactions,
@@ -18,7 +20,7 @@ from gnucsh.cli import (
 from tests.testhelpers import createTestLedger, createTestLedgerWithDuplicates
 
 
-class TestGnucsh(unittest.TestCase):
+class TestCli(unittest.TestCase):
     def test__find_duplicates(self):
         testBookFile = os.path.join(tempfile.gettempdir(), "example.gnucash")
         createTestLedgerWithDuplicates(testBookFile)
@@ -81,15 +83,16 @@ class TestGnucsh(unittest.TestCase):
             listTransactions(testBookFile, "Expenses")
 
         today = datetime.today().strftime("%Y-%m-%d")
-        self.assertMultiLineEqual(
-            f.getvalue(),
-            """###  Account:'Expenses'  filter:'None'  ###
-{}   4       Groceries                                                                                                                               Savings
-{}   15      Pharmacy                                                                                                                                Savings
+        assert (
+            f.getvalue()
+            == """###  Account:'Expenses'  filter:'None'  ###
+{}   4.00    Groceries                                                                                                                               Savings
+{}   15.00   Pharmacy                                                                                                                                Savings
 """.format(
                 today, today
-            ),
+            )
         )
+        # )
 
     def test__should_change_transfer_account(self):
         # given
@@ -122,3 +125,26 @@ class TestGnucsh(unittest.TestCase):
             )
         # teardown
         builtins.input = original_raw_input
+
+    def test_should_allow_reading_from_csv(self):
+        testBookFile = os.path.join(tempfile.gettempdir(), "example.gnucash")
+        createTestLedger(testBookFile)
+
+        csv = os.path.join(tempfile.gettempdir(), "example.csv")
+        with open(csv, "w") as f:
+            _ = f.write(
+                """date;description;transfer;-amount
+2024-12-09;Schokocremecroissant  2.00€ x 1;Savings;2.00
+2024-12-09;Laugenbrezen  0.90€ x 1;Savings;0.90
+2024-12-09;Mehrkornbrötchen  0.75€ x 1;Savings;0.75
+2024-12-09;Apfeltasche  2.00€ x 1;Savings;2.00
+"""
+            )
+        importCsv(testBookFile, csv, "Expenses")
+
+        with openLedger(testBookFile) as book:
+            expensesAcct = book.findAccountByName("Expenses")
+            entries = expensesAcct.getEntries()
+            assert dateStringToDate("2024-12-09") == entries[2].date
+            assert "Laugenbrezen  0.90€ x 1" == entries[3].description
+            assert "-0.90" == entries[3].value

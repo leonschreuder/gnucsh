@@ -3,6 +3,7 @@
 
 import re
 import warnings
+from datetime import date
 from typing import cast
 
 from piecash import Account, Split
@@ -48,13 +49,22 @@ class BaseAccount:
                 )
             )
 
-    def addEntry(self, value: str, description: str, base: Self):
+    def addEntry(
+        self,
+        value: str,
+        description: str,
+        base: Self,
+        entryDate: date | None = None,
+    ):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
+            postDate = entryDate if entryDate is not None else date.today()
+
             valueNum = Decimal(value)
             _ = Transaction(
                 currency=self.backingAccount.commodity,
                 description=description,
+                post_date=postDate,
                 splits=[
                     Split(value=valueNum, account=self.backingAccount),
                     Split(value=-valueNum, account=base.backingAccount),
